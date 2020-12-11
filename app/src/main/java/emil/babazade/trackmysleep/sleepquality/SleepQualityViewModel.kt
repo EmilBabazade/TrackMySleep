@@ -40,6 +40,7 @@ class SleepQualityViewModel(
             val tonight = database.get(sleepNightKey) ?: return@launch
             tonight.sleepQuality = quality
             database.update(tonight)
+            _navigateToSleepTracker.value = true
         }
     }
 }
