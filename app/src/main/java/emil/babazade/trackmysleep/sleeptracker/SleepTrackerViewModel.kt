@@ -17,10 +17,7 @@
 package emil.babazade.trackmysleep.sleeptracker
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import emil.babazade.trackmysleep.database.SleepDatabaseDao
 import emil.babazade.trackmysleep.database.SleepNight
 import emil.babazade.trackmysleep.formatNights
@@ -33,6 +30,9 @@ class SleepTrackerViewModel(
     val database: SleepDatabaseDao,
     application: Application
 ) : AndroidViewModel(application) {
+    private val _navigateToSleepQuality = MutableLiveData<SleepNight?>()
+    val navigateToSleepQuality: LiveData<SleepNight?>
+        get() = _navigateToSleepQuality
     private var tonight = MutableLiveData<SleepNight?>()
     private val nights = database.getAllNights()
     val nightsString = Transformations.map(nights) { nights ->
@@ -70,6 +70,7 @@ class SleepTrackerViewModel(
             val oldNight = tonight.value ?: return@launch
             oldNight.endTimeMilli = System.currentTimeMillis()
             update(oldNight)
+            _navigateToSleepQuality.value = oldNight
         }
     }
 
@@ -78,6 +79,10 @@ class SleepTrackerViewModel(
             clear()
             tonight.value = null
         }
+    }
+
+    fun doneNavigating() {
+        _navigateToSleepQuality.value = null
     }
 
     private suspend fun clear() {
